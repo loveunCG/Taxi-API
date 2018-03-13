@@ -24,8 +24,8 @@
                         <div id="first_step">
                             <div class="col-md-4">
                                 <input value="+91" type="text" placeholder="+1" id="country_code" name="country_code" />
-                            </div> 
-                            
+                            </div>
+
                             <div class="col-md-8">
                                 <input type="text" autofocus id="phone_number" class="form-control" placeholder="Enter Phone Number" name="phone_number" value="{{ old('phone_number') }}" />
                             </div>
@@ -73,7 +73,7 @@
                                     <span class="help-block">
                                         <strong>{{ $errors->first('email') }}</strong>
                                     </span>
-                                @endif                        
+                                @endif
                             </div>
 
                             <div class="col-md-12">
@@ -83,7 +83,7 @@
                                     <span class="help-block">
                                         <strong>{{ $errors->first('gender') }}</strong>
                                     </span>
-                                @endif                        
+                                @endif
                             </div>
 
                             <div class="col-md-12">
@@ -105,17 +105,17 @@
                                     </span>
                                 @endif
                             </div>
-                            
+
                             <div class="col-md-12">
                                 <button class="log-teal-btn" type="submit">REGISTER</button>
                             </div>
 
                         </div>
 
-                    </form>     
+                    </form>
 
                     <div class="col-md-12">
-                        <p class="helper">Or <a href="{{route('login')}}">Sign in</a> with your user account.</p>   
+                        <p class="helper">Or <a href="{{route('login')}}">Sign in</a> with your user account.</p>
                     </div>
 
                 </div>
@@ -132,7 +132,7 @@
 @section('scripts')
 <script type="text/javascript">
     $('.checkbox-inline').on('change', function() {
-        $('.checkbox-inline').not(this).prop('checked', false);  
+        $('.checkbox-inline').not(this).prop('checked', false);
     });
 </script>
 <script src="https://sdk.accountkit.com/en_US/sdk.js"></script>
@@ -141,8 +141,8 @@
   AccountKit_OnInteractive = function(){
     AccountKit.init(
       {
-        appId: {{env('FB_APP_ID')}}, 
-        state:"state", 
+        appId: "{{env('FB_APP_ID')}}", 
+        state:"state",
         version: "{{env('FB_APP_VERSION')}}",
         fbAppEventsEnabled:true
       }
@@ -185,7 +185,7 @@
     $('#country_code').attr('readonly',true);
 
     AccountKit.login(
-      'PHONE', 
+      'PHONE',
       {countryCode: countryCode, phoneNumber: phoneNumber}, // will use default values if not specified
       loginCallback
     );
