@@ -32,7 +32,7 @@ class DispatcherController extends Controller
         $this->middleware('demo', ['only' => ['profile_update', 'password_update']]);
     }
 
-    
+
     /**
      * Dispatcher Panel.
      *
@@ -41,10 +41,12 @@ class DispatcherController extends Controller
      */
     public function index()
     {
+
+        $google_map_key = getenv('GOOGLE_MAP_KEY') ?: 'AIzaSyAEUmh64dLv-5TjOtb-aTrmxONXZ0ACseY';
         if(Auth::guard('admin')->user()){
             return view('admin.dispatcher');
         }elseif(Auth::guard('dispatcher')->user()){
-            return view('dispatcher.dispatcher');
+            return view('dispatcher.dispatcher', compact('google_map_key'));
         }
     }
 
@@ -63,7 +65,7 @@ class DispatcherController extends Controller
         }else if($request->type == "CANCELLED"){
             $Trips = $Trips->where('status',$request->type);
         }
-        
+
         $Trips =  $Trips->paginate(10);
 
         return $Trips;
@@ -154,7 +156,7 @@ class DispatcherController extends Controller
             } catch (Exception $e) {
                 $Filter = new RequestFilter;
                 $Filter->request_id = $Request->id;
-                $Filter->provider_id = $Provider->id; 
+                $Filter->provider_id = $Provider->id;
                 $Filter->status = 0;
                 $Filter->save();
             }
@@ -222,7 +224,7 @@ class DispatcherController extends Controller
                         ->where('schedule_at', '>', strtotime($request->schedule_time." - 1 hour"))
                         ->where('schedule_at', '<', strtotime($request->schedule_time." + 1 hour"))
                         ->firstOrFail();
-                
+
                 if($request->ajax()) {
                     return response()->json(['error' => trans('api.ride.request_scheduled')], 500);
                 } else {
@@ -250,7 +252,7 @@ class DispatcherController extends Controller
             $UserRequest->current_provider_id = 0;
             $UserRequest->service_type_id = $request->service_type;
             $UserRequest->payment_mode = 'CASH';
-            
+
             $UserRequest->status = 'SEARCHING';
 
             $UserRequest->s_address = $request->s_address ? : "";
@@ -294,7 +296,7 @@ class DispatcherController extends Controller
                 if(count($Providers) == 0) {
                     if($request->ajax()) {
                         // Push Notification to User
-                        return response()->json(['message' => trans('api.ride.no_providers_found')]); 
+                        return response()->json(['message' => trans('api.ride.no_providers_found')]);
                     } else {
                         return back()->with('flash_success', 'No Providers Found! Please try again.');
                     }
@@ -314,7 +316,7 @@ class DispatcherController extends Controller
                 foreach ($Providers as $key => $Provider) {
                     $Filter = new RequestFilter;
                     $Filter->request_id = $UserRequest->id;
-                    $Filter->provider_id = $Provider->id; 
+                    $Filter->provider_id = $Provider->id;
                     $Filter->save();
                 }
             }
@@ -371,7 +373,7 @@ class DispatcherController extends Controller
         catch (Exception $e) {
              return back()->with('flash_error','Something Went Wrong!');
         }
-        
+
     }
 
     /**
@@ -435,7 +437,7 @@ class DispatcherController extends Controller
             if($UserRequest->status == 'CANCELLED')
             {
                 if($request->ajax()) {
-                    return response()->json(['error' => trans('api.ride.already_cancelled')], 500); 
+                    return response()->json(['error' => trans('api.ride.already_cancelled')], 500);
                 }else{
                     return back()->with('flash_error', 'Request is Already Cancelled!');
                 }
@@ -465,14 +467,14 @@ class DispatcherController extends Controller
                 (new SendPushNotification)->ProviderCancellRide($UserRequest);
 
                 if($request->ajax()) {
-                    return response()->json(['message' => trans('api.ride.ride_cancelled')]); 
+                    return response()->json(['message' => trans('api.ride.ride_cancelled')]);
                 }else{
                     return back()->with('flash_success','Request Cancelled Successfully');
                 }
 
             } else {
                 if($request->ajax()) {
-                    return response()->json(['error' => trans('api.ride.already_onride')], 500); 
+                    return response()->json(['error' => trans('api.ride.already_onride')], 500);
                 }else{
                     return back()->with('flash_error', 'Service Already Started!');
                 }

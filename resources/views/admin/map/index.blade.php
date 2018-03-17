@@ -6,7 +6,7 @@
 
 <div class="content-area py-1">
     <div class="container-fluid">
-        
+
         <div class="box box-block bg-white">
             <h5 class="mb-1">Map View</h5>
             <div class="row">
@@ -28,7 +28,7 @@
         height: 100%;
         min-height: 500px;
     }
-    
+
     #legend {
         font-family: Arial, sans-serif;
         background: rgba(255,255,255,0.8);
@@ -84,16 +84,16 @@
         var div = document.createElement('div');
         div.innerHTML = '<img src="' + mapIcons['offline'] + '"> ' + 'Unavailable Provider';
         legend.appendChild(div);
-        
+
         var div = document.createElement('div');
         div.innerHTML = '<img src="' + mapIcons['active'] + '"> ' + 'Available Provider';
         legend.appendChild(div);
-        
+
         var div = document.createElement('div');
         div.innerHTML = '<img src="' + mapIcons['unactivated'] + '"> ' + 'Unactivated Provider';
         legend.appendChild(div);
         map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(legend);
-        
+
         google.maps.Map.prototype.clearOverlays = function() {
             for (var i = 0; i < googleMarkers.length; i++ ) {
                 googleMarkers[i].setMap(null);
@@ -120,7 +120,7 @@
     }
 
     function addMarkerToMap(element, index) {
-        
+
         marker = new google.maps.Marker({
             position: {
                 lat: element.latitude,
@@ -139,5 +139,5 @@
         });
     }
 </script>
-<script src="//maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_KEY') }}&libraries=places&callback=initMap" async defer></script>
+<script src="//maps.googleapis.com/maps/api/js?key={{$google_map_key}}&libraries=places&callback=initMap" async defer></script>
 @endsection
