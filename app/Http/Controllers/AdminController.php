@@ -35,7 +35,7 @@ class AdminController extends Controller
     {
         $this->middleware('admin');
         $this->middleware('demo', ['only' => [
-                'settings_store', 
+                'settings_store',
                 'settings_payment_store',
                 'profile_update',
                 'password_update',
@@ -98,7 +98,8 @@ class AdminController extends Controller
      */
     public function map_index()
     {
-        return view('admin.map.index');
+      $google_map_key = getenv('GOOGLE_MAP_KEY') ?: 'AIzaSyAEUmh64dLv-5TjOtb-aTrmxONXZ0ACseY';
+      return view('admin.map.index',compact('google_map_key'));
     }
 
     /**
@@ -119,7 +120,7 @@ class AdminController extends Controller
                     ->where('longitude', '!=', 0)
                     ->get();
 
-            for ($i=0; $i < sizeof($Users); $i++) { 
+            for ($i=0; $i < sizeof($Users); $i++) {
                 $Users[$i]->status = 'user';
             }
 
@@ -186,7 +187,7 @@ class AdminController extends Controller
         Setting::set('broadcast_request', $request->broadcast_request == 'on' ? 1 : 0 );
         Setting::set('track_distance', $request->track_distance == 'on' ? 1 : 0 );
         Setting::save();
-        
+
         return back()->with('flash_success','Settings Updated Successfully');
     }
 
@@ -270,9 +271,9 @@ class AdminController extends Controller
             $admin = Auth::guard('admin')->user();
             $admin->name = $request->name;
             $admin->email = $request->email;
-            
+
             if($request->hasFile('picture')){
-                $admin->picture = $request->picture->store('admin/profile');  
+                $admin->picture = $request->picture->store('admin/profile');
             }
             $admin->save();
 
@@ -282,7 +283,7 @@ class AdminController extends Controller
         catch (Exception $e) {
              return back()->with('flash_error','Something Went Wrong!');
         }
-        
+
     }
 
     /**
@@ -341,7 +342,7 @@ class AdminController extends Controller
                     ->has('payment')
                     ->orderBy('user_requests.created_at','desc')
                     ->get();
-            
+
             return view('admin.payment.payment-history', compact('payments'));
         } catch (Exception $e) {
              return back()->with('flash_error','Something Went Wrong!');
@@ -495,7 +496,7 @@ class AdminController extends Controller
             $rides = UserRequests::with('payment')->orderBy('id','desc');
             $cancel_rides = UserRequests::where('status','CANCELLED');
             $revenue = UserRequestPayment::select(\DB::raw(
-                           'SUM(ROUND(fixed) + ROUND(distance)) as overall, SUM(ROUND(commision)) as commission' 
+                           'SUM(ROUND(fixed) + ROUND(distance)) as overall, SUM(ROUND(commision)) as commission'
                        ));
 
             if($type == 'today'){
@@ -584,7 +585,7 @@ class AdminController extends Controller
 
                 $Providers[$index]->payment = UserRequestPayment::whereIn('request_id', $Rides)
                                 ->select(\DB::raw(
-                                   'SUM(ROUND(provider_pay)) as overall, SUM(ROUND(provider_commission)) as commission' 
+                                   'SUM(ROUND(provider_pay)) as overall, SUM(ROUND(provider_commission)) as commission'
                                 ))->get();
             }
 
@@ -730,7 +731,7 @@ class AdminController extends Controller
                         $Users = User::whereHas('trips', function($query) {
                             $query->where('created_at','>=',Carbon::now()->subHour());
                         })->get();
-                        
+
                     }elseif($Push->condition_data == 'WEEK'){
 
                         $Users = User::whereHas('trips', function($query){
@@ -784,7 +785,7 @@ class AdminController extends Controller
                         $Providers = Provider::whereHas('trips', function($query){
                             $query->where('created_at','>=',Carbon::now()->subHour());
                         })->get();
-                        
+
                     }elseif($Push->condition_data == 'WEEK'){
 
                         $Providers = Provider::whereHas('trips', function($query){

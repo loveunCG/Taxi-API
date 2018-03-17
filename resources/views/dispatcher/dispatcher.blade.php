@@ -28,7 +28,7 @@
 
 <script type="text/javascript" src="{{ asset('asset/js/dispatcher-map.js') }}"></script>
 <script type="text/babel" src="{{ asset('asset/js/dispatcher.js') }}"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_KEY') }}&libraries=places&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{$google_map_key}}&libraries=places&callback=initMap" async defer></script>
 @endsection
 
 @section('styles')
@@ -48,7 +48,7 @@
     }
     .my-card .card-header .btn{
         font-size: 10px;
-        padding: 3px 7px;   
+        padding: 3px 7px;
     }
     .tag.my-tag{
         padding: 10px 15px;
