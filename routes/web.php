@@ -8,7 +8,6 @@
 
 
 Auth::routes();
-
 Route::get('auth/facebook', 'Auth\SocialLoginController@redirectToFaceBook');
 Route::get('auth/facebook/callback', 'Auth\SocialLoginController@handleFacebookCallback');
 Route::get('auth/google', 'Auth\SocialLoginController@redirectToGoogle');
@@ -22,7 +21,6 @@ Route::post('account/kit', 'Auth\SocialLoginController@account_kit')->name('acco
 */
 
 Route::group(['prefix' => 'provider'], function () {
-
     Route::get('auth/facebook', 'Auth\SocialLoginController@providerToFaceBook');
     Route::get('auth/google', 'Auth\SocialLoginController@providerToGoogle');
 
@@ -49,7 +47,6 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('/login', 'AdminAuth\LoginController@showLoginForm');
     Route::post('/login', 'AdminAuth\LoginController@login');
     Route::post('/logout', 'AdminAuth\LoginController@logout');
-
     Route::post('/password/email', 'AdminAuth\ForgotPasswordController@sendResetLinkEmail');
     Route::post('/password/reset', 'AdminAuth\ResetPasswordController@reset');
     Route::get('/password/reset', 'AdminAuth\ForgotPasswordController@showLinkRequestForm');

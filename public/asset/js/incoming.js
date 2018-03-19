@@ -67,14 +67,14 @@ class MainComponent extends React.Component {
         if(this.props.trip == "true") {
             var location = { latitude: this.state.latitude, longitude: this.state.longitude };
             return (
-                <div> 
+                <div>
                     <ModalComponent request={this.state.request} />
                     <TripComponent request={this.state.request} service_status={this.state.service_status} account_status={this.state.account_status} location={location} />
                 </div>
             );
         } else {
             return (
-                <div> 
+                <div>
                     <ModalComponent request={this.state.request} />
                 </div>
             );
@@ -93,7 +93,7 @@ class ModalComponent extends React.Component {
 
     _accept(event) {
         event.preventDefault();
-        console.log('Accept');
+        console.log('Accept', this.props.request.id);
         $.ajax({
             url: '/provider/request/'+this.props.request.id,
             dataType: 'json',
@@ -222,7 +222,7 @@ class TripEmptyOffline extends React.Component {
 };
 
 class TripArrivedButton extends React.Component {
-    
+
     constructor(props) {
         super(props);
         this.state = {
@@ -263,7 +263,7 @@ class TripArrivedButton extends React.Component {
                 <button type="button" className="full-primary-btn fare-btn reg-btn" data-toggle="modal" data-target="#cancel-reason">Cancel</button>
             </div>
         );
-    }    
+    }
 }
 
 class TripPickedButton extends React.Component {
@@ -358,7 +358,7 @@ class TripRatingButton extends React.Component {
                     <label>Your Comments</label>
                     <textarea className="form-control" name="comment" value={this.state.comment} onChange={this.handleCommentChange} placeholder="Write Comment" />
                 </div>
-                <button type="submit" className="full-primary-btn fare-btn" onClick={this._submit.bind(this)}>SUBMIT REVIEW</button>   
+                <button type="submit" className="full-primary-btn fare-btn" onClick={this._submit.bind(this)}>SUBMIT REVIEW</button>
             </div>
         );
     }
@@ -441,7 +441,7 @@ class TripComponent extends React.Component {
                     }
                 });
                 break;
-            case "ARRIVED": 
+            case "ARRIVED":
                 this.form= {
                         status: "PICKEDUP",
                         _method: "PATCH",
@@ -459,7 +459,7 @@ class TripComponent extends React.Component {
                 });
 
                 break;
-            case "PICKEDUP": 
+            case "PICKEDUP":
                 this.form= {
                         status: "DROPPED",
                         _method: "PATCH",
@@ -477,7 +477,7 @@ class TripComponent extends React.Component {
                 });
 
                 break;
-            case "DROPPED": 
+            case "DROPPED":
                 this.form= {
                         status: "COMPLETED",
                         _method: "PATCH",
@@ -525,27 +525,27 @@ class TripComponent extends React.Component {
 
     getButtons() {
         switch(this.props.request.status) {
-            case "STARTED": 
+            case "STARTED":
                 return (
                     <TripArrivedButton submit={this._submit.bind(this)} cancel={this._cancel.bind(this)} />
                 );
                 break;
-            case "ARRIVED": 
+            case "ARRIVED":
                 return (
                     <TripPickedButton submit={this._submit.bind(this)} />
                 );
                 break;
-            case "PICKEDUP": 
+            case "PICKEDUP":
                 return (
                     <TripDroppedButton submit={this._submit.bind(this)} />
                 );
                 break;
-            case "DROPPED": 
+            case "DROPPED":
                 return (
                     <TripCompletedButton submit={this._submit.bind(this)} />
                 );
                 break;
-            case "COMPLETED": 
+            case "COMPLETED":
                 return (
                     <TripRatingButton request={this.props.request.id} />
                 );

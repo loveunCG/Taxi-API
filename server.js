@@ -1,9 +1,9 @@
-var app = require('express')(); 
+var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var debug = require('debug')('Tranxit:Chat');
 var request = require('request');
-var port = process.env.PORT || '3000';
+var port = process.env.PORT || '8888';
 
 process.env.DEBUG = '*';
 // process.env.DEBUG = '*,-express*,-engine*,-send,-*parser';
@@ -70,7 +70,7 @@ io.on('connection', function (socket) {
 
         // request(url, function (error, response, body) {
         //     if (!error && response.statusCode == 200) {
-        //         // console.log(body); // Show the HTML for the Google homepage. 
+        //         // console.log(body); // Show the HTML for the Google homepage.
         //     }
         // });
     });
