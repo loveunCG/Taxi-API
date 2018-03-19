@@ -94,35 +94,35 @@ class ProviderController extends Controller
      */
     public function earnings()
     {
-        $provider = Provider::where('id',\Auth::guard('provider')->user()->id)
-                    ->with('service','accepted','cancelled')
+        $provider = Provider::where('id', \Auth::guard('provider')->user()->id)
+                    ->with('service', 'accepted', 'cancelled')
                     ->get();
 
-        $weekly = UserRequests::where('provider_id',\Auth::guard('provider')->user()->id)
+        $weekly = UserRequests::where('provider_id', \Auth::guard('provider')->user()->id)
                     ->with('payment')
                     ->where('created_at', '>=', Carbon::now()->subWeekdays(7))
                     ->get();
 
-        $weekly_sum = UserRequestPayment::whereHas('request', function($query) {
-                        $query->where('provider_id',\Auth::guard('provider')->user()->id);
-                        $query->where('created_at', '>=', Carbon::now()->subWeekdays(7));
-                    })
+        $weekly_sum = UserRequestPayment::whereHas('request', function ($query) {
+            $query->where('provider_id', \Auth::guard('provider')->user()->id);
+            $query->where('created_at', '>=', Carbon::now()->subWeekdays(7));
+        })
                         ->sum('provider_pay');
 
-        $today = UserRequests::where('provider_id',\Auth::guard('provider')->user()->id)
+        $today = UserRequests::where('provider_id', \Auth::guard('provider')->user()->id)
                     ->where('created_at', '>=', Carbon::today())
                     ->count();
 
-        $fully = UserRequests::where('provider_id',\Auth::guard('provider')->user()->id)
-                    ->with('payment','service_type')
+        $fully = UserRequests::where('provider_id', \Auth::guard('provider')->user()->id)
+                    ->with('payment', 'service_type')
                     ->get();
 
-        $fully_sum = UserRequestPayment::whereHas('request', function($query) {
-                        $query->where('provider_id', \Auth::guard('provider')->user()->id);
-                        })
+        $fully_sum = UserRequestPayment::whereHas('request', function ($query) {
+            $query->where('provider_id', \Auth::guard('provider')->user()->id);
+        })
                         ->sum('provider_pay');
 
-        return view('provider.payment.earnings',compact('provider','weekly','fully','today','weekly_sum','fully_sum'));
+        return view('provider.payment.earnings', compact('provider', 'weekly', 'fully', 'today', 'weekly_sum', 'fully_sum'));
     }
 
     /**
@@ -160,14 +160,13 @@ class ProviderController extends Controller
 
         $Provider = \Auth::user();
 
-        if(password_verify($request->old_password, $Provider->password))
-        {
+        if (password_verify($request->old_password, $Provider->password)) {
             $Provider->password = bcrypt($request->password);
             $Provider->save();
 
-            return back()->with('flash_success','Password changed successfully!');
+            return back()->with('flash_success', 'Password changed successfully!');
         } else {
-            return back()->with('flash_error','Please enter correct password');
+            return back()->with('flash_error', 'Please enter correct password');
         }
     }
 
@@ -194,14 +193,12 @@ class ProviderController extends Controller
                 'longitude' => 'required|numeric',
             ]);
 
-        if($Provider = \Auth::user()){
-
+        if ($Provider = \Auth::user()) {
             $Provider->latitude = $request->latitude;
             $Provider->longitude = $request->longitude;
             $Provider->save();
 
             return back()->with(['flash_success' => 'Location Updated successfully!']);
-
         } else {
             return back()->with(['flash_error' => 'Provider Not Found!']);
         }
@@ -215,7 +212,7 @@ class ProviderController extends Controller
     public function upcoming_trips()
     {
         $fully = (new ProviderResources\TripController)->upcoming_trips();
-        return view('provider.payment.upcoming',compact('fully'));
+        return view('provider.payment.upcoming', compact('fully'));
     }
 
     /**
@@ -225,8 +222,9 @@ class ProviderController extends Controller
      */
 
 
-    public function cancel(Request $request) {
-        try{
+    public function cancel(Request $request)
+    {
+        try {
             (new TripController)->cancel($request);
             return back();
         } catch (ModelNotFoundException $e) {

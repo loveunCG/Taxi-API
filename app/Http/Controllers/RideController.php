@@ -33,15 +33,14 @@ class RideController extends Controller
         $service = (new Resource\ServiceResource)->show($request->service_type);
         $cards = (new Resource\CardResource)->index();
 
-        if($request->has('current_longitude') && $request->has('current_latitude'))
-        {
-            User::where('id',Auth::user()->id)->update([
-                'latitude' => $request->current_latitude,
-                'longitude' => $request->current_longitude
+        if ($request->has('s_latitude') && $request->has('s_longitude')) {
+            User::where('id', Auth::user()->id)->update([
+                'latitude' => $request->s_latitude,
+                'longitude' => $request->s_longitude
             ]);
         }
 
-        return view('user.ride.confirm_ride',compact('request','fare','service','cards'));
+        return view('user.ride.confirm_ride', compact('request', 'fare', 'service', 'cards'));
     }
 
     /**
