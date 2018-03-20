@@ -38,10 +38,9 @@ function AutocompleteDirectionsHandler(map) {
     this.directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: false, polylineOptions: polylineOptionsActual});
     this.directionsDisplay.setMap(map);
 
-    var originAutocomplete = new google.maps.places.Autocomplete(
-            originInput);
-    var destinationAutocomplete = new google.maps.places.Autocomplete(
-            destinationInput);
+    var originAutocomplete = new google.maps.places.Autocomplete(originInput);
+    var destinationAutocomplete = new google.maps.places.Autocomplete(destinationInput);
+    console.log(originInput.value);
 
     originAutocomplete.addListener('place_changed', function(event) {
         var place = originAutocomplete.getPlace();
@@ -114,11 +113,12 @@ AutocompleteDirectionsHandler.prototype.setupPlaceChangedListener = function(aut
 
 };
 
+
 AutocompleteDirectionsHandler.prototype.route = function() {
     if (!this.originPlaceId || !this.destinationPlaceId) {
         return;
     }
-    
+
     var me = this;
 
     this.directionsService.route({

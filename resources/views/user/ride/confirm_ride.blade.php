@@ -39,7 +39,7 @@
                         <dt>@lang('user.type')</dt>
                         <dd>{{$service->name}}</dd>
                         <dt>@lang('user.total_distance')</dt>
-                        <dd>{{$fare->distance?$fare->distance:0}} Kms</dd>
+                        <dd>{{$fare->distance}} Kms</dd>
                         <dt>@lang('user.eta')</dt>
                         <dd>{{$fare->time}}</dd>
                         <dt>@lang('user.estimated_fare')</dt>
@@ -56,7 +56,7 @@
                     </dl>
 
                     <input type="hidden" name="s_address" id="origin-input" value="{{Request::get('s_address')}}">
-                    <input type="hidden" name="d_address" id="destination-input" value="">
+                    <input type="hidden" name="d_address" id="destination-input" value="{{Request::get('d_address')}}">
                     <input type="hidden" name="s_latitude" value="{{Request::get('s_latitude')}}">
                     <input type="hidden" name="distance" value="{{$fare->distance}}">
                     <input type="hidden" name="s_latitude" id="origin_latitude" value="{{Request::get('s_latitude')}}">
@@ -161,19 +161,63 @@
 @endsection
 
 @section('scripts')
-<script type="text/javascript" src="{{ asset('asset/js/map.js') }}"></script>
 
     <script type="text/javascript">
-    var current_latitude = 13.0574400;
-    var current_longitude = 80.2482605;
+        var current_latitude = 13.0574400;
+        var current_longitude = 80.2482605;
+        var s_latitude = parseFloat('{{Request::get('s_latitude')}}');
+        var d_longitude = parseFloat('{{Request::get('d_longitude')}}');
+        var s_longitude = parseFloat('{{Request::get('s_longitude')}}');
+        var d_latitude = parseFloat('{{Request::get('d_latitude')}}');
+        var s_position, d_position;
+        var poly, geodesicPoly;
+        var markerArray = [];
+        function initMap() {
+          var directionsService = new google.maps.DirectionsService;
+          var stepDisplay = new google.maps.InfoWindow;
+          var map = new google.maps.Map(document.getElementById('map'), {
+              mapTypeControl: false,
+              zoomControl: true,
+              center: {lat: current_latitude, lng: current_longitude},
+              zoom: 15,
+                styles : [{"elementType":"geometry","stylers":[{"color":"#f5f5f5"}]},{"elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"elementType":"labels.text.fill","stylers":[{"color":"#616161"}]},{"elementType":"labels.text.stroke","stylers":[{"color":"#f5f5f5"}]},{"featureType":"administrative.land_parcel","elementType":"labels.text.fill","stylers":[{"color":"#bdbdbd"}]},{"featureType":"landscape.man_made","elementType":"geometry","stylers":[{"color":"#e4e8e9"}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#eeeeee"}]},{"featureType":"poi","elementType":"labels.text.fill","stylers":[{"color":"#757575"}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#e5e5e5"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#7de843"}]},{"featureType":"poi.park","elementType":"labels.text.fill","stylers":[{"color":"#9e9e9e"}]},{"featureType":"road","elementType":"geometry","stylers":[{"color":"#ffffff"}]},{"featureType":"road.arterial","elementType":"labels.text.fill","stylers":[{"color":"#757575"}]},{"featureType":"road.highway","elementType":"geometry","stylers":[{"color":"#dadada"}]},{"featureType":"road.highway","elementType":"labels.text.fill","stylers":[{"color":"#616161"}]},{"featureType":"road.local","elementType":"labels.text.fill","stylers":[{"color":"#9e9e9e"}]},{"featureType":"transit.line","elementType":"geometry","stylers":[{"color":"#e5e5e5"}]},{"featureType":"transit.station","elementType":"geometry","stylers":[{"color":"#eeeeee"}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#c9c9c9"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#9bd0e8"}]},{"featureType":"water","elementType":"labels.text.fill","stylers":[{"color":"#9e9e9e"}]}]
+          });
+          var directionsDisplay = new google.maps.DirectionsRenderer({map: map});
+          directionsService.route({
+            origin: document.getElementById('origin-input').value,
+            destination: document.getElementById('destination-input').value,
+            travelMode: 'DRIVING'
+          }, function(response, status) {
+            // Route the directions and pass the response to a function to create
+            // markers for each step.
+            if (status === 'OK') {
+              directionsDisplay.setDirections(response);
+              // showSteps(response, markerArray, stepDisplay, map);
+            } else {
+              window.alert('Directions request failed due to ' + status);
+            }
+          });
+
+          function showSteps(directionResult, markerArray, stepDisplay, map) {
+           var myRoute = directionResult.routes[0].legs[0];
+           for (var i = 0; i < myRoute.steps.length; i++) {
+             var marker = markerArray[i] = markerArray[i] || new google.maps.Marker;
+             marker.setMap(map);
+             marker.setPosition(myRoute.steps[i].start_location);
+
+           }
+         }
+
+        }
+
+
+
+
+
+
+
 
         $(document).ready(function(){
-            setTimeout(function(){
-              $('#destination-input').value = "{{Request::get('d_address')}}";
-              $('#destination-input').change();
-
-            }, 3000);
-
             $('#schedule_button').click(function(){
                 $("#datepicker").clone().attr('type','hidden').appendTo($('#create_ride'));
                 $("#timepicker").clone().attr('type','hidden').appendTo($('#create_ride'));
