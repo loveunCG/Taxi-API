@@ -39,7 +39,7 @@
                         <dt>@lang('user.type')</dt>
                         <dd>{{$service->name}}</dd>
                         <dt>@lang('user.total_distance')</dt>
-                        <dd>{{$fare->distance}} Kms</dd>
+                        <dd>{{$fare->distance?$fare->distance:0}} Kms</dd>
                         <dt>@lang('user.eta')</dt>
                         <dd>{{$fare->time}}</dd>
                         <dt>@lang('user.estimated_fare')</dt>
@@ -55,14 +55,16 @@
                         @endif
                     </dl>
 
-                    <input type="hidden" name="s_address" value="{{Request::get('s_address')}}">
-                    <input type="hidden" name="d_address" value="{{Request::get('d_address')}}">
+                    <input type="hidden" name="s_address" id="origin-input" value="{{Request::get('s_address')}}">
+                    <input type="hidden" name="d_address" id="destination-input" value="">
                     <input type="hidden" name="s_latitude" value="{{Request::get('s_latitude')}}">
-                    <input type="hidden" name="s_longitude" value="{{Request::get('s_longitude')}}">
-                    <input type="hidden" name="d_latitude" value="{{Request::get('d_latitude')}}">
-                    <input type="hidden" name="d_longitude" value="{{Request::get('d_longitude')}}">
-                    <input type="hidden" name="service_type" value="{{Request::get('service_type')}}">
                     <input type="hidden" name="distance" value="{{$fare->distance}}">
+                    <input type="hidden" name="s_latitude" id="origin_latitude" value="{{Request::get('s_latitude')}}">
+                    <input type="hidden" name="s_longitude" id="origin_longitude" value="{{Request::get('s_longitude')}}">
+                    <input type="hidden" name="d_latitude" id="destination_latitude" value="{{Request::get('d_latitude')}}">
+                    <input type="hidden" name="d_longitude" id="destination_longitude" value="{{Request::get('d_longitude')}}">
+                    <input type="hidden" name="current_longitude" id="long">
+                    <input type="hidden" name="current_latitude" id="lat">
 
                     <p>@lang('user.payment_method')</p>
                     <select class="form-control" name="payment_mode" id="payment_mode" onchange="card(this.value);">
@@ -91,7 +93,7 @@
                         <span><em>Note : Due to High Demand the fare may vary!</em></span>
                         <div class="surge-block"><span class="surge-text">{{$fare->surge_value}}</span>
                         </div>
-                    
+
                     @endif
 
                     <button type="submit" class="half-primary-btn fare-btn">@lang('user.ride.ride_now')</button>
@@ -102,10 +104,10 @@
 
             <div class="col-md-6">
                 <div class="user-request-map">
-                    <?php 
+                    <?php
                     $map_icon = asset('asset/img/marker-start.png');
-                    $static_map = "https://maps.googleapis.com/maps/api/staticmap?autoscale=1&size=600x450&maptype=roadmap&format=png&visual_refresh=true&markers=icon:".$map_icon."%7C".$request->s_latitude.",".$request->s_longitude."&markers=icon:".$map_icon."%7C".$request->d_latitude.",".$request->d_longitude."&path=color:0x191919|weight:8|".$request->s_latitude.",".$request->s_longitude."|".$request->d_latitude.",".$request->d_longitude."&key=".env('GOOGLE_MAP_KEY'); ?>
-                    <div class="map-static" style="background-image: url({{$static_map}});">
+                    $static_map = "https://maps.googleapis.com/maps/api/staticmap?autoscale=1&size=600x450&maptype=roadmap&format=png&visual_refresh=true&markers=icon:".$map_icon."%7C".$request->s_latitude.",".$request->s_longitude."&markers=icon:".$map_icon."%7C".$request->d_latitude.",".$request->d_longitude."&path=color:0x191919|weight:8|enc:".$request->route_key."&key=".env('GOOGLE_MAP_KEY'); ?>
+                    <div class="map-static map-responsive" id="map"  >
                     </div>
                     <div class="from-to row no-margin">
                         <div class="from">
@@ -117,7 +119,7 @@
                             <p>{{$request->d_address}}</p>
                         </div>
                     </div>
-                </div> 
+                </div>
             </div>
         </div>
 
@@ -138,7 +140,7 @@
       </div>
       <form>
       <div class="modal-body">
-        
+
         <label>Date</label>
         <input value="{{date('m/d/Y')}}" type="text" id="datepicker" placeholder="Date" name="schedule_date">
         <label>Time</label>
@@ -159,8 +161,19 @@
 @endsection
 
 @section('scripts')
+<script type="text/javascript" src="{{ asset('asset/js/map.js') }}"></script>
+
     <script type="text/javascript">
+    var current_latitude = 13.0574400;
+    var current_longitude = 80.2482605;
+
         $(document).ready(function(){
+            setTimeout(function(){
+              $('#destination-input').value = "{{Request::get('d_address')}}";
+              $('#destination-input').change();
+
+            }, 3000);
+
             $('#schedule_button').click(function(){
                 $("#datepicker").clone().attr('type','hidden').appendTo($('#create_ride'));
                 $("#timepicker").clone().attr('type','hidden').appendTo($('#create_ride'));
@@ -171,7 +184,7 @@
     <script type="text/javascript">
         var date = new Date();
         date.setDate(date.getDate()-1);
-        $('#datepicker').datepicker({  
+        $('#datepicker').datepicker({
             startDate: date
         });
         $('#timepicker').timepicker({showMeridian : false});
@@ -185,4 +198,6 @@
             }
         }
     </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_KEY') }}&libraries=places&callback=initMap"></script>
+
 @endsection

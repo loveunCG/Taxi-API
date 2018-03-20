@@ -12,10 +12,10 @@
 		        <h4 class="page-title" id="ride_status"></h4>
 		    </div>
 		</div>
-		
+
 		<div class="row no-margin">
 		        <div class="col-md-6" id="container" >
-		    		<p>Loading...</p>                             
+		    		<p>Loading...</p>
 		        </div>
 
 		        <div class="col-md-6">
@@ -24,7 +24,7 @@
 		                <dd>{{$request->id}}</dd>
 		                <dt>@lang('user.time')</dt>
 		                <dd>{{date('d-m-Y H:i A',strtotime($request->assigned_at))}}</dd>
-		            </dl> 
+		            </dl>
 		            <div class="user-request-map">
 
 		                <div class="from-to row no-margin">
@@ -41,14 +41,13 @@
 		                        <p>{{$request->service_type->name}}</p>
 		                    </div>
 		                </div>
-		                <?php 
-		                    $map_icon = asset('asset/img/marker-start.png');
-		                    $static_map = "https://maps.googleapis.com/maps/api/staticmap?autoscale=1&size=600x450&maptype=roadmap&format=png&visual_refresh=true&markers=icon:".$map_icon."%7C".$request->s_latitude.",".$request->s_longitude."&markers=icon:".$map_icon."%7C".$request->d_latitude.",".$request->d_longitude."&path=color:0x191919|weight:8|enc:".$request->route_key."&key=".env('GOOGLE_MAP_KEY'); ?>
-
-		                    <div class="map-image">
+		                <?php
+                         $map_icon = asset('asset/img/marker-start.png');
+                         $static_map = "https://maps.googleapis.com/maps/api/staticmap?autoscale=1&size=600x450&maptype=roadmap&format=png&visual_refresh=true&markers=icon:".$map_icon."%7C".$request->s_latitude.",".$request->s_longitude."&markers=icon:".$map_icon."%7C".$request->d_latitude.",".$request->d_longitude."&path=color:0x191919|weight:8|enc:".$request->route_key."&key=".env('GOOGLE_MAP_KEY'); ?>
+ 		                    <div class="map-image">
 		                    	<img src="{{$static_map}}">
-		                    </div>                               
-		            </div>                          
+		                    </div>
+		            </div>
 		        </div>
 		</div>
 	</div>
@@ -57,13 +56,12 @@
 @endsection
 
 @section('scripts')
-    <script type="text/javascript" src="{{asset('asset/js/rating.js')}}"></script>    
+    <script type="text/javascript" src="{{asset('asset/js/rating.js')}}"></script>
 	<script type="text/javascript">
 		$('.rating').rating();
 	</script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/react.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.13.3/JSXTransformer.js"></script>
     <script type="text/jsx">
 		var MainComponent = React.createClass({
 			getInitialState: function () {
@@ -187,7 +185,7 @@
 						);
 					}
 				}else{
-					return ( 
+					return (
 						<p></p>
 					 );
 				}
@@ -205,7 +203,7 @@
 			                <p>@lang('user.ride.finding_driver')</p>
 			            </div>
 
-		            	<button type="submit" className="full-primary-btn fare-btn">@lang('user.ride.cancel_request')</button> 
+		            	<button type="submit" className="full-primary-btn fare-btn">@lang('user.ride.cancel_request')</button>
 		            </form>
 				);
 			}
@@ -243,7 +241,7 @@
 				                </dd>
 				                <dt>@lang('user.payment_mode')</dt>
 				                <dd>{this.props.checkState.payment_mode}</dd>
-				            </dl> 
+				            </dl>
 			            </div>
 
 		            </form>
@@ -285,7 +283,7 @@
 			                <p>@lang('user.ride.arrived_ride')</p>
 			            </div>
 			            <CancelReason/>
-		            	<button type="button" className="full-primary-btn" data-toggle="modal" data-target="#cancel-reason">@lang('user.ride.cancel_request')</button> 
+		            	<button type="button" className="full-primary-btn" data-toggle="modal" data-target="#cancel-reason">@lang('user.ride.cancel_request')</button>
 		            	<br/>
 		            		<h5><strong>@lang('user.ride.ride_details')</strong></h5>
 		            	<div className="driver-details">
@@ -306,7 +304,7 @@
 				                </dd>
 				                <dt>@lang('user.payment_mode')</dt>
 				                <dd>{this.props.checkState.payment_mode}</dd>
-				            </dl> 
+				            </dl>
 			            </div>
 		            </form>
 				);
@@ -341,7 +339,7 @@
 				                </dd>
 			                <dt>@lang('user.payment_mode')</dt>
 			                <dd>{this.props.checkState.payment_mode}</dd>
-			            </dl> 
+			            </dl>
 		            </div>
 		        </div>
 				);
@@ -390,7 +388,7 @@
                             {this.props.checkState.use_wallet ?
 								<span>
 								<dt>@lang('user.ride.detection_wallet')</dt>
-                            	<dd>{this.props.currency}{this.props.checkState.payment.wallet}</dd>  
+                            	<dd>{this.props.currency}{this.props.checkState.payment.wallet}</dd>
                             	</span>
                             : ''
                             }
@@ -413,11 +411,11 @@
 								)</dt>
                             	<dd>
 
-                            	{this.props.currency}{this.props.checkState.payment.discount}</dd>  
+                            	{this.props.currency}{this.props.checkState.payment.discount}</dd>
                             	</span>
                            @endif
                             <dt>@lang('user.ride.total')</dt>
-                            <dd>{this.props.currency}{this.props.checkState.payment.total}</dd> 
+                            <dd>{this.props.currency}{this.props.checkState.payment.total}</dd>
                             <dt className="big">@lang('user.ride.amount_paid')</dt>
                             <dd className="big">{this.props.currency}{this.props.checkState.payment.payable}</dd>
                         </dl>
@@ -472,22 +470,22 @@
                             {this.props.checkState.use_wallet ?
 								<span>
 								<dt>@lang('user.ride.detection_wallet')</dt>
-                            	<dd>{this.props.currency}{this.props.checkState.payment.wallet}</dd>  
+                            	<dd>{this.props.currency}{this.props.checkState.payment.wallet}</dd>
                             	</span>
                             : ''
                             }
                             {this.props.checkState.payment.discount ?
 								<span>
 								<dt>@lang('user.ride.promotion_applied')</dt>
-                            	<dd>{this.props.currency}{this.props.checkState.payment.discount}</dd>  
+                            	<dd>{this.props.currency}{this.props.checkState.payment.discount}</dd>
                             	</span>
                             : ''
                             }
-                            <dd>{this.props.currency}{this.props.checkState.payment.total}</dd> 
+                            <dd>{this.props.currency}{this.props.checkState.payment.total}</dd>
                             <dt className="big">@lang('user.ride.amount_paid')</dt>
                             <dd className="big">{this.props.currency}{this.props.checkState.payment.total}</dd>
                         </dl>
-                    	<button type="submit" className="full-primary-btn fare-btn">CONTINUE TO PAY - {this.props.currency}{this.props.checkState.payment.payable}</button>   
+                    	<button type="submit" className="full-primary-btn fare-btn">CONTINUE TO PAY - {this.props.currency}{this.props.checkState.payment.payable}</button>
                     </form>
 		        </div>
 				);
@@ -508,7 +506,7 @@
                         <label>@lang('user.ride.comment')</label>
                         <textarea className="form-control" name="comment" placeholder="Write Comment"></textarea>
                     </div>
-                    <button type="submit" className="full-primary-btn fare-btn">SUBMIT</button>   
+                    <button type="submit" className="full-primary-btn fare-btn">SUBMIT</button>
                 </form>
 				);
 			}

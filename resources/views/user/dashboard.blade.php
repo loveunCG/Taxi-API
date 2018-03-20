@@ -34,7 +34,7 @@
 
                         @foreach($services as $service)
                         <div class="car-radio">
-                            <input type="radio" 
+                            <input type="radio"
                                 name="service_type"
                                 value="{{$service->id}}"
                                 id="service_{{$service->id}}"
@@ -59,7 +59,7 @@
             <div class="col-md-6">
                 <div class="map-responsive">
                     <div id="map" style="width: 100%; height: 450px;"></div>
-                </div> 
+                </div>
             </div>
         </div>
     </div>
@@ -67,12 +67,12 @@
 
 @endsection
 
-@section('scripts')    
+@section('scripts')
 <script type="text/javascript">
     var current_latitude = 13.0574400;
     var current_longitude = 80.2482605;
 </script>
-
+<script type="text/javascript" src="{{ asset('asset/js/map.js') }}"></script>
 <script type="text/javascript">
     if( navigator.geolocation ) {
        navigator.geolocation.getCurrentPosition( success, fail );
@@ -99,10 +99,9 @@
         console.log('unable to get your location');
         initMap();
     }
-</script> 
+</script>
 
-<script type="text/javascript" src="{{ asset('asset/js/map.js') }}"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_KEY') }}&libraries=places&callback=initMap" async defer></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAP_KEY') }}&libraries=places&callback=initMap"></script>
 
 <script type="text/javascript">
     function disableEnterKey(e)
