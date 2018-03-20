@@ -22,9 +22,9 @@
 
     @include('user.include.header')
 
-    <div class="page-content dashboard-page">    
+    <div class="page-content dashboard-page">
         <div class="container">
-            
+
             @include('user.include.nav')
             @yield('content')
 
@@ -36,9 +36,9 @@
 
 
     <script src="{{asset('asset/js/jquery.min.js')}}"></script>
-    <script src="{{asset('asset/js/bootstrap.min.js')}}"></script>       
+    <script src="{{asset('asset/js/bootstrap.min.js')}}"></script>
     <script type="text/javascript" src="{{asset('asset/js/jquery.mousewheel.js')}}"></script>
-    <script type="text/javascript" src="{{asset('asset/js/jquery-migrate-1.2.1.min.js')}}"></script> 
+    <script type="text/javascript" src="{{asset('asset/js/jquery-migrate-1.2.1.min.js')}}"></script>
     <script type="text/javascript" src="{{asset('asset/js/slick.min.js')}}"></script>
     <script src="{{asset('asset/js/bootstrap-datepicker.min.js')}}"></script>
     <script src="{{asset('asset/js/bootstrap-timepicker.js')}}"></script>
@@ -58,6 +58,6 @@
     @endif
 
     @yield('scripts')
-    
+
 </body>
 </html>
