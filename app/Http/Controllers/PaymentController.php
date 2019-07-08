@@ -2,153 +2,146 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Card;
 use App\Http\Controllers\SendPushNotification;
-
+use App\User;
+use App\UserRequestPayment;
+use App\UserRequests;
+use App\WalletPassbook;
+use Auth;
+use Exception;
+use Illuminate\Http\Request;
+use Setting;
 use Stripe\Charge;
 use Stripe\Stripe;
 use Stripe\StripeInvalidRequestError;
 
-use Auth;
-use Setting;
-use Exception;
+class PaymentController extends Controller {
+	/**
+	 * payment for user.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function payment(Request $request) {
+		$this->validate($request, [
+			'request_id' => 'required|exists:user_request_payments,request_id|exists:user_requests,id,paid,0,user_id,' . Auth::user()->id,
+		]);
 
-use App\Card;
-use App\User;
-use App\WalletPassbook;
-use App\UserRequests;
-use App\UserRequestPayment;
+		$UserRequest = UserRequests::find($request->request_id);
 
-class PaymentController extends Controller
-{
-       /**
-     * payment for user.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function payment(Request $request)
-    {
-        $this->validate($request, [
-                'request_id' => 'required|exists:user_request_payments,request_id|exists:user_requests,id,paid,0,user_id,'.Auth::user()->id
-            ]);
+		if ($UserRequest->payment_mode == 'CARD') {
 
+			$RequestPayment = UserRequestPayment::where('request_id', $request->request_id)->first();
 
-        $UserRequest = UserRequests::find($request->request_id);
+			$StripeCharge = $RequestPayment->total * 100;
 
-        if($UserRequest->payment_mode == 'CARD') {
+			try {
 
-            $RequestPayment = UserRequestPayment::where('request_id',$request->request_id)->first(); 
+				$Card = Card::where('user_id', Auth::user()->id)->where('is_default', 1)->first();
 
-            $StripeCharge = $RequestPayment->total * 100;
+				Stripe::setApiKey(Setting::get('stripe_secret_key'));
 
-            try {
+				$Charge = Charge::create(array(
+					"amount" => $StripeCharge,
+					"currency" => "usd",
+					"customer" => Auth::user()->stripe_cust_id,
+					"card" => $Card->card_id,
+					"description" => "Payment Charge for " . Auth::user()->email,
+					"receipt_email" => Auth::user()->email,
+				));
 
-                $Card = Card::where('user_id',Auth::user()->id)->where('is_default',1)->first();
+				$RequestPayment->payment_id = $Charge["id"];
+				$RequestPayment->payment_mode = 'CARD';
+				$RequestPayment->save();
 
-                Stripe::setApiKey(Setting::get('stripe_secret_key'));
+				$UserRequest->paid = 1;
+				$UserRequest->status = 'COMPLETED';
+				$UserRequest->save();
 
-                $Charge = Charge::create(array(
-                      "amount" => $StripeCharge,
-                      "currency" => "usd",
-                      "customer" => Auth::user()->stripe_cust_id,
-                      "card" => $Card->card_id,
-                      "description" => "Payment Charge for ".Auth::user()->email,
-                      "receipt_email" => Auth::user()->email
-                    ));
+				if ($request->ajax()) {
+					return response()->json(['message' => trans('api.paid')]);
+				} else {
+					return redirect('dashboard')->with('flash_success', 'Paid');
+				}
 
-                $RequestPayment->payment_id = $Charge["id"];
-                $RequestPayment->payment_mode = 'CARD';
-                $RequestPayment->save();
+			} catch (StripeInvalidRequestError $e) {
+				if ($request->ajax()) {
+					return response()->json(['error' => $e->getMessage()], 500);
+				} else {
+					return back()->with('flash_error', $e->getMessage());
+				}
+			} catch (Exception $e) {
+				if ($request->ajax()) {
+					return response()->json(['error' => $e->getMessage()], 500);
+				} else {
+					return back()->with('flash_error', $e->getMessage());
+				}
+			}
+		}
+	}
 
-                $UserRequest->paid = 1;
-                $UserRequest->status = 'COMPLETED';
-                $UserRequest->save();
+	/**
+	 * add wallet money for user.
+	 *
+	 * @return \Illuminate\Http\Response
+	 */
+	public function add_money(Request $request) {
 
-                if($request->ajax()) {
-                   return response()->json(['message' => trans('api.paid')]); 
-                } else {
-                    return redirect('dashboard')->with('flash_success','Paid');
-                }
+		$this->validate($request, [
+			'amount' => 'required|integer',
+			'card_id' => 'required|exists:cards,card_id,user_id,' . Auth::user()->id,
+		]);
 
-            } catch(StripeInvalidRequestError $e){
-                if($request->ajax()){
-                    return response()->json(['error' => $e->getMessage()], 500);
-                } else {
-                    return back()->with('flash_error', $e->getMessage());
-                }
-            } catch(Exception $e) {
-                if($request->ajax()){
-                    return response()->json(['error' => $e->getMessage()], 500);
-                } else {
-                    return back()->with('flash_error', $e->getMessage());
-                }
-            }
-        }
-    }
+		try {
 
+			$StripeWalletCharge = $request->amount * 100;
 
-    /**
-     * add wallet money for user.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function add_money(Request $request){
+			Stripe::setApiKey(Setting::get('stripe_secret_key'));
 
-        $this->validate($request, [
-                'amount' => 'required|integer',
-                'card_id' => 'required|exists:cards,card_id,user_id,'.Auth::user()->id
-            ]);
+			$Charge = Charge::create(array(
+				"amount" => $StripeWalletCharge,
+				"currency" => "usd",
+				"customer" => Auth::user()->stripe_cust_id,
+				"card" => $request->card_id,
+				"description" => "Adding Money for " . Auth::user()->email,
+				"receipt_email" => Auth::user()->email,
+			));
 
-        try{
-            
-            $StripeWalletCharge = $request->amount * 100;
+			$update_user = User::find(Auth::user()->id);
+			$update_user->wallet_balance += $request->amount;
+			$update_user->save();
 
-            Stripe::setApiKey(Setting::get('stripe_secret_key'));
+			WalletPassbook::create([
+				'user_id' => Auth::user()->id,
+				'amount' => $request->amount,
+				'status' => 'CREDITED',
+				'via' => 'CARD',
+			]);
 
-            $Charge = Charge::create(array(
-                  "amount" => $StripeWalletCharge,
-                  "currency" => "usd",
-                  "customer" => Auth::user()->stripe_cust_id,
-                  "card" => $request->card_id,
-                  "description" => "Adding Money for ".Auth::user()->email,
-                  "receipt_email" => Auth::user()->email
-                ));
+			Card::where('user_id', Auth::user()->id)->update(['is_default' => 0]);
+			Card::where('card_id', $request->card_id)->update(['is_default' => 1]);
 
-            $update_user = User::find(Auth::user()->id);
-            $update_user->wallet_balance += $request->amount;
-            $update_user->save();
+			//sending push on adding wallet money
+			(new SendPushNotification)->WalletMoney(Auth::user()->id, currency($request->amount));
 
-            WalletPassbook::create([
-              'user_id' => Auth::user()->id,
-              'amount' => $request->amount,
-              'status' => 'CREDITED',
-              'via' => 'CARD',
-            ]);
+			if ($request->ajax()) {
+				return response()->json(['message' => currency($request->amount) . trans('api.added_to_your_wallet'), 'user' => $update_user]);
+			} else {
+				return redirect('wallet')->with('flash_success', currency($request->amount) . ' added to your wallet');
+			}
 
-            Card::where('user_id',Auth::user()->id)->update(['is_default' => 0]);
-            Card::where('card_id',$request->card_id)->update(['is_default' => 1]);
-
-            //sending push on adding wallet money
-            (new SendPushNotification)->WalletMoney(Auth::user()->id,currency($request->amount));
-
-            if($request->ajax()){
-                return response()->json(['message' => currency($request->amount).trans('api.added_to_your_wallet'), 'user' => $update_user]); 
-            } else {
-                return redirect('wallet')->with('flash_success',currency($request->amount).' added to your wallet');
-            }
-
-        } catch(StripeInvalidRequestError $e) {
-            if($request->ajax()){
-                 return response()->json(['error' => $e->getMessage()], 500);
-            }else{
-                return back()->with('flash_error',$e->getMessage());
-            }
-        } catch(Exception $e) {
-            if($request->ajax()) {
-                return response()->json(['error' => $e->getMessage()], 500);
-            } else {
-                return back()->with('flash_error', $e->getMessage());
-            }
-        }
-    }
+		} catch (StripeInvalidRequestError $e) {
+			if ($request->ajax()) {
+				return response()->json(['error' => $e->getMessage()], 500);
+			} else {
+				return back()->with('flash_error', $e->getMessage());
+			}
+		} catch (Exception $e) {
+			if ($request->ajax()) {
+				return response()->json(['error' => $e->getMessage()], 500);
+			} else {
+				return back()->with('flash_error', $e->getMessage());
+			}
+		}
+	}
 }
